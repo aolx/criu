@@ -430,6 +430,7 @@ void init_opts(void)
 	opts.pre_dump_mode = PRE_DUMP_SPLICE;
 	opts.file_validation_method = FILE_VALIDATION_DEFAULT;
 	opts.network_lock_method = NETWORK_LOCK_DEFAULT;
+	opts.tcp_close = true;
 }
 
 bool deprecated_ok(char *what)
@@ -1064,6 +1065,7 @@ bad_arg:
 
 int check_options(void)
 {
+	pr_info("%s\n", __func__);
 	if (opts.tcp_established_ok)
 		pr_info("Will dump/restore TCP connections\n");
 	if (opts.tcp_skip_in_flight)

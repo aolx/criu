@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <sched.h>
+#include <sys/time.h>
 
 #include "version.h"
 #include "crtools.h"
@@ -241,7 +242,7 @@ int send_criu_rpc_script(enum script_actions act, char *name, int sk, int fd)
 
 static char images_dir[PATH_MAX];
 
-static int setup_opts_from_req(int sk, CriuOpts *req)
+static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 {
 	struct ucred ids;
 	struct stat st;
@@ -380,6 +381,9 @@ static int setup_opts_from_req(int sk, CriuOpts *req)
 		pr_perror("Can't chdir to work_dir");
 		goto err;
 	}
+
+	if (is_restore_req)
+		system("/ubuntu/prepare_images_dir.sh >> /tmp/prepare_images_dir.log");
 
 	/* initiate log file in work dir */
 	if (req->log_file && !output_changed_by_rpc_conf) {
@@ -739,7 +743,7 @@ static int dump_using_req(int sk, CriuOpts *req)
 	bool self_dump = !req->pid;
 
 	opts.mode = CR_DUMP;
-	if (setup_opts_from_req(sk, req))
+	if (setup_opts_from_req(sk, req, false))
 		goto exit;
 
 	setproctitle("dump --rpc -t %d -D %s", req->pid, images_dir);
@@ -772,6 +776,16 @@ pidfd_store_err:
 static int restore_using_req(int sk, CriuOpts *req)
 {
 	bool success = false;
+    struct timeval t1, t2;
+    double elapsedTime;
+
+    FILE *fptr = fopen("/tmp/restore_time.log", "a");
+    if (fptr == NULL)
+    {
+        printf("Could not open file");
+        exit(1);
+    }
+
 
 	/*
 	 * We can't restore processes under arbitrary task yet.
@@ -782,13 +796,23 @@ static int restore_using_req(int sk, CriuOpts *req)
 	opts.restore_detach = true;
 
 	opts.mode = CR_RESTORE;
-	if (setup_opts_from_req(sk, req))
+	if (setup_opts_from_req(sk, req, true))
 		goto exit;
 
 	setproctitle("restore --rpc -D %s", images_dir);
 
+    // start timer
+    gettimeofday(&t1, NULL);
+
 	if (cr_restore_tasks())
 		goto exit;
+
+    // stop timer
+    gettimeofday(&t2, NULL);
+    elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+    elapsedTime += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+    fprintf(fptr, "restore took %f ms.\n", elapsedTime);
+	fclose(fptr);
 
 	success = true;
 exit:
@@ -834,7 +858,7 @@ static int check(int sk, CriuOpts *req)
 		setproctitle("check --rpc");
 
 		opts.mode = CR_CHECK;
-		if (setup_opts_from_req(sk, req))
+		if (setup_opts_from_req(sk, req, false))
 			exit(1);
 
 		exit(!!cr_check());
@@ -866,7 +890,7 @@ static int pre_dump_using_req(int sk, CriuOpts *req, bool single)
 		int ret = 1;
 
 		opts.mode = CR_PRE_DUMP;
-		if (setup_opts_from_req(sk, req))
+		if (setup_opts_from_req(sk, req, false))
 			goto cout;
 
 		setproctitle("pre-dump --rpc -t %d -D %s", req->pid, images_dir);
@@ -944,7 +968,7 @@ static int start_page_server_req(int sk, CriuOpts *req, bool daemon_mode)
 		close(start_pipe[0]);
 
 		opts.mode = CR_PAGE_SERVER;
-		if (setup_opts_from_req(sk, req))
+		if (setup_opts_from_req(sk, req, false))
 			goto out_ch;
 
 		setproctitle("page-server --rpc --address %s --port %hu", opts.addr, opts.port);
@@ -1191,7 +1215,7 @@ static int handle_cpuinfo(int sk, CriuReq *msg)
 		int ret = 1;
 
 		opts.mode = CR_CPUINFO;
-		if (setup_opts_from_req(sk, msg->opts))
+		if (setup_opts_from_req(sk, msg->opts, false))
 			goto cout;
 
 		setproctitle("cpuinfo %s --rpc -D %s", msg->type == CRIU_REQ_TYPE__CPUINFO_DUMP ? "dump" : "check",

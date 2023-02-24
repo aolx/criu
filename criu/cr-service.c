@@ -383,7 +383,7 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 	}
 
 	if (is_restore_req)
-		system("/ubuntu/prepare_images_dir.sh >> /tmp/prepare_images_dir.log");
+		if (system("/ubuntu/prepare_images_dir.sh >> /tmp/prepare_images_dir.log"));
 
 	/* initiate log file in work dir */
 	if (req->log_file && !output_changed_by_rpc_conf) {

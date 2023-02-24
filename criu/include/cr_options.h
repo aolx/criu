@@ -72,7 +72,7 @@ enum NETWORK_LOCK_METHOD {
 /*
  * Ghost file size we allow to carry by default.
  */
-#define DEFAULT_GHOST_LIMIT (1 << 20)
+#define DEFAULT_GHOST_LIMIT (1 << 30)
 
 #define DEFAULT_TIMEOUT 10
 

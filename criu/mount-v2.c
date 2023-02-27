@@ -32,6 +32,7 @@ LIST_HEAD(sharing_groups);
 
 int check_mount_v2(void)
 {
+	return -1;
 	if (!kdat.has_move_mount_set_group) {
 		pr_debug("Mounts-v2 requires MOVE_MOUNT_SET_GROUP support\n");
 		return -1;

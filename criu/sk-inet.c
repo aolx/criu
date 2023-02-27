@@ -964,6 +964,7 @@ int inet_bind(int sk, struct inet_sk_info *ii)
 	bool rst_freebind = false;
 	union libsoccr_addr addr;
 	int addr_size, ifindex = 0;
+	char debugip[1024] = { 0 };
 
 	if (ii->ie->ifname) {
 		ifindex = if_nametoindex(ii->ie->ifname);
@@ -997,7 +998,8 @@ int inet_bind(int sk, struct inet_sk_info *ii)
 	}
 
 	if (bind(sk, (struct sockaddr *)&addr, addr_size) == -1) {
-		pr_perror("Can't bind inet socket (id %d)", ii->ie->id);
+		inet_ntop(AF_INET, &addr.v4.sin_addr, debugip, sizeof(debugip));
+		pr_perror("Can't bind inet socket (id %d ip %s)", ii->ie->id, debugip);
 		return -1;
 	}
 

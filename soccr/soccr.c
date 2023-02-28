@@ -472,6 +472,7 @@ static int libsoccr_set_sk_data_noq(struct libsoccr_sk *sk, struct libsoccr_sk_d
 	int addr_size, mstate;
 	int onr = 0;
 	__u32 seq;
+	char debugip[1024];
 
 	if (!data || data_size < SOCR_DATA_MIN_SIZE) {
 		loge("Invalid input parameters\n");
@@ -496,7 +497,8 @@ static int libsoccr_set_sk_data_noq(struct libsoccr_sk *sk, struct libsoccr_sk_d
 		addr_size = sizeof(sk->src_addr->v6);
 
 	if (bind(sk->fd, &sk->src_addr->sa, addr_size)) {
-		logerr("Can't bind inet socket back");
+		inet_ntop(AF_INET, &sk->src_addr->v4.sin_addr, debugip, sizeof(debugip));
+		logerr("Can't bind inet socket back (%s)", debugip);
 		return -1;
 	}
 
@@ -526,7 +528,8 @@ static int libsoccr_set_sk_data_noq(struct libsoccr_sk *sk, struct libsoccr_sk_d
 		return -1;
 
 	if (connect(sk->fd, &sk->dst_addr->sa, addr_size) == -1 && errno != EINPROGRESS) {
-		logerr("Can't connect inet socket back");
+		inet_ntop(AF_INET, &sk->src_addr->v4.sin_addr, debugip, sizeof(debugip));
+		logerr("Can't connect inet socket back %s", debugip);
 		return -1;
 	}
 

@@ -452,8 +452,8 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 		opts.restore_sibling = req->rst_sibling;
 	}
 
-	if (req->has_tcp_established)
-		opts.tcp_established_ok = req->tcp_established;
+	//if (req->has_tcp_established)
+	//	opts.tcp_established_ok = req->tcp_established;
 
 	if (req->has_tcp_skip_in_flight)
 		opts.tcp_skip_in_flight = req->tcp_skip_in_flight;

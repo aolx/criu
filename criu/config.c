@@ -430,7 +430,7 @@ void init_opts(void)
 	opts.pre_dump_mode = PRE_DUMP_SPLICE;
 	opts.file_validation_method = FILE_VALIDATION_DEFAULT;
 	opts.network_lock_method = NETWORK_LOCK_DEFAULT;
-	opts.tcp_close = true;
+	opts.tcp_established_ok = true;
 }
 
 bool deprecated_ok(char *what)

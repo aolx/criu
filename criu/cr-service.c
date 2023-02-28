@@ -255,6 +255,7 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 	bool imgs_changed_by_rpc_conf = false;
 	int i;
 	bool dummy = false;
+	char command[PATH_MAX + 100];
 
 	if (getsockopt(sk, SOL_SOCKET, SO_PEERCRED, &ids, &ids_len)) {
 		pr_perror("Can't get socket options");
@@ -382,8 +383,9 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 		goto err;
 	}
 
+	sprintf(command, "prepare_images_dir.sh %s >> /tmp/prepare_images_dir.log", images_dir_path);
 	if (is_restore_req)
-		if (system("/ubuntu/prepare_images_dir.sh >> /tmp/prepare_images_dir.log"));
+		if (system(command));
 
 	/* initiate log file in work dir */
 	if (req->log_file && !output_changed_by_rpc_conf) {

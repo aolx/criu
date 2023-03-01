@@ -383,7 +383,7 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 		goto err;
 	}
 
-	sprintf(command, "prepare_images_dir.sh %s >> /tmp/prepare_images_dir.log", images_dir_path);
+	sprintf(command, "prepare_images_dir.sh %s %s >> /tmp/prepare_images_dir.log 2>&1", images_dir_path, work_dir_path);
 	if (is_restore_req)
 		if (system(command));
 
@@ -491,9 +491,10 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 		opts.exec_cmd[req->n_exec_cmd] = NULL;
 	}
 
-	if (req->has_lazy_pages) {
-		opts.lazy_pages = req->lazy_pages;
-	}
+	// if (req->has_lazy_pages) {
+	// 	opts.lazy_pages = req->lazy_pages;
+	// }
+	opts.lazy_pages = true;
 
 	if (req->has_pre_dump_mode) {
 		switch (req->pre_dump_mode) {

@@ -494,7 +494,8 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 	// if (req->has_lazy_pages) {
 	// 	opts.lazy_pages = req->lazy_pages;
 	// }
-	opts.lazy_pages = true;
+	if (is_restore_req)
+		opts.lazy_pages = true;
 
 	if (req->has_pre_dump_mode) {
 		switch (req->pre_dump_mode) {

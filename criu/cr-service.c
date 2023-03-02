@@ -491,9 +491,10 @@ static int setup_opts_from_req(int sk, CriuOpts *req, bool is_restore_req)
 		opts.exec_cmd[req->n_exec_cmd] = NULL;
 	}
 
-	// if (req->has_lazy_pages) {
-	// 	opts.lazy_pages = req->lazy_pages;
-	// }
+	if (req->has_lazy_pages) {
+		opts.lazy_pages = req->lazy_pages;
+	}
+
 	if (is_restore_req)
 		opts.lazy_pages = true;
 

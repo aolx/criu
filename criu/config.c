@@ -33,6 +33,8 @@
 struct cr_options opts;
 char *rpc_cfg_file;
 
+FILE *my_tmp_file;
+
 static int count_elements(char **to_count)
 {
 	int count = 0;
@@ -431,6 +433,8 @@ void init_opts(void)
 	opts.file_validation_method = FILE_VALIDATION_DEFAULT;
 	opts.network_lock_method = NETWORK_LOCK_DEFAULT;
 	opts.tcp_established_ok = true;
+
+	my_tmp_file = fopen("/tmp/criu-log", "w");
 }
 
 bool deprecated_ok(char *what)
@@ -788,6 +792,8 @@ int parse_options(int argc, char **argv, bool *usage_error, bool *has_exec_cmd, 
 			break;
 		case 'W':
 			SET_CHAR_OPTS(work_dir, optarg);
+			fprintf(my_tmp_file, "%s", opts.work_dir);
+			fflush(my_tmp_file);
 			break;
 		case 'o':
 			SET_CHAR_OPTS(output, optarg);

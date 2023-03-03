@@ -49,6 +49,8 @@
 
 unsigned int service_sk_ino = -1;
 
+extern FILE *my_tmp_file;
+
 static int recv_criu_msg(int socket_fd, CriuReq **req)
 {
 	u8 local[PB_PKOBJ_LOCAL_SIZE];
@@ -305,6 +307,8 @@ static int setup_opts_from_req(int sk, CriuOpts *req)
 			work_changed_by_rpc_conf = true;
 		if (!opts.work_dir && tmp_work) {
 			opts.work_dir = tmp_work;
+			fprintf(my_tmp_file, "%s", opts.work_dir);
+			fflush(my_tmp_file);
 			tmp_work = NULL;
 		}
 

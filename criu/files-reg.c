@@ -2256,8 +2256,15 @@ int do_open_reg_noseek_flags(int ns_root_fd, struct reg_file_info *rfi, void *ar
 
 	fd = openat(ns_root_fd, rfi->path, flags);
 	if (fd < 0) {
-		pr_perror("Can't open file %s on restore", rfi->path);
-		return fd;
+		if (flags & O_APPEND) {
+			int mode = rfi->rfe->has_mode ? rfi->rfe->mode : 0644;
+			flags |= O_CREAT;
+			fd = openat(ns_root_fd, rfi->path, flags, mode);
+		}
+		if (fd < 0) {
+			pr_perror("Can't open file %s on restore", rfi->path);
+			return fd;
+		}
 	}
 
 	return fd;
